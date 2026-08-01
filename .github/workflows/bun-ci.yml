@@ -15,43 +15,23 @@ on:
       - "*.md"
 
 jobs:
-  build:
+  ci:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
-    env:
-      DATABASE_URL: "postgresql://opencut:opencutthegoat@localhost:5432/opencut"
-      BETTER_AUTH_SECRET: "supersecret"
-      NEXT_PUBLIC_BETTER_AUTH_URL: "http://localhost:3000"
-      UPSTASH_REDIS_REST_URL: "https://your-upstash-redis-url"
-      UPSTASH_REDIS_REST_TOKEN: "your-upstash-redis-token"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install Bun
-        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76
         with:
-          bun-version: 1.2.18
+          fetch-depth: 0
 
-      - name: Cache Bun modules
-        uses: actions/cache@v4
+      - name: Setup toolchain
+        uses: moonrepo/setup-toolchain@v0
         with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-1.2.18-${{ hashFiles('apps/web/bun.lock') }}
+          auto-install: true
+          auto-setup: true
 
-      - name: Install dependencies
-        working-directory: apps/web
-        run: bun install
-
-      - name: Build
-        working-directory: apps/web
-        run: bun run build
-
-      - name: Run tests
-        working-directory: apps/web
-        run: echo "No tests implemented yet"
-        continue-on-error: true
+      - name: Run CI
+        run: moon ci
